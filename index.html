@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube Player - Paused on Load</title>
+  <script src="https://www.youtube.com/iframe_api"></script>
+  <style>
+    body {
+      background-color: rgb(215, 207, 177);
+    }
+    #playerContainer {
+      transition: opacity 5s ease-out;
+    }
+  </style>
+</head>
+<body>
+  <div id="playerContainer">
+    <div id="player"></div>
+  </div>
+  <button onclick="startPlayback()">Start Playback</button>
+  <button onclick="getCurrentVideoUrl()">Get Current Video URL</button>
+  <button onclick="returnToPreviousVideo()">Return to Previous Video</button>
+  <input type="number" id="durationInput" placeholder="Enter minutes" />
+  <button onclick="startPlaybackWithCustomDuration()">Start with Custom Duration</button>
+  <p> </p>
+  <p> </p>
+  <p><b>"Sounds of Me Achieving Tempos in Concentric Circles:" Cine-O-Moto-Tope</b><br></p>
+  <p>
+  <p><br>Cine-O-Tope instructions:<br><br>choose a duration for cinema playback (minutes) and enter in text box above<br><br>then, press "Start with Custom Duration"<br><br>videos will play back, at random start and end points, selected at random<br><br>"Start Playback" will advance video to another, new selection<br><br>to view full video, click "get current url" to display video url to select and copy<br><br>press "play previous video" to see previously-displayed video<br><br> project can be muted by clicking "mute" on video player<br><br>to stop project, close browser window<br><br>
+<br>
+    </p>    
+
+
+  <script>
+    let currentPlayer;
+    let currentVideoId;
+    let previousVideoId;
+    let playbackTimeout;
+    let fadeoutInterval;
+    let videoTimeout;
+
+    const videos = [     
+      { id: 'o7Zqh4NR3UM', start: getRandomInt },
+      { id: 'zMsFJjJcXoE', start: getRandomInt },
+      { id: 'jjRzc4w6Xfw', start: getRandomInt },
+      { id: 'fwvZBHwiVrk', start: getRandomInt },
+      { id: 'dBnYVuwF7VY', start: getRandomInt },
+      { id: 'IQAn2Z80gn0', start: getRandomInt },
+      { id: 'ITjHMWibaPo', start: getRandomInt },
+      { id: 'vvqFAyJj53M', start: getRandomInt },
+      { id: 'O5a1QNUZ8nc', start: getRandomInt },
+      { id: 'hWXp1SF38sU', start: getRandomInt },
+      { id: 'Ugs6iEWQ-R4', start: getRandomInt },
+      { id: 'MMIMG-QArww', start: getRandomInt },
+      { id: 'l2SjhV7lt_0', start: getRandomInt },
+      { id: '2gaGDLdsuto', start: getRandomInt },
+      { id: 'QZxfq3h6n18', start: getRandomInt },
+      { id: 'sjSiLKVE3SA', start: getRandomInt },
+      { id: 'uQKakjRTsA4', start: getRandomInt },
+      { id: '5wpDj1FP1n4', start: getRandomInt },
+      { id: 'vOmLbfrDmLk', start: getRandomInt },
+      { id: '0zkcHNqYK74', start: getRandomInt },
+      { id: 'WO46e-zmp8Y', start: getRandomInt },
+      { id: 'Oxyqr7lS9N8', start: getRandomInt },
+      { id: 'lXovr2ViZbA', start: getRandomInt },
+      { id: 'N2DVwUlhXpc', start: getRandomInt },
+      { id: 'qLwVMpq1euo', start: getRandomInt },
+      { id: 'lh0M67j2oA0', start: getRandomInt },
+      { id: 'JZ9yhEdqFS8', start: getRandomInt },
+      { id: 'vseKLe1dnuo', start: getRandomInt },
+      { id: 'ZbfuXJ2qW9E', start: getRandomInt },
+      { id: 'GRwu9TnVWaY', start: getRandomInt },
+      { id: 'b_ILGBqMto8', start: getRandomInt },
+      { id: 'bnWGlbW_d84', start: getRandomInt },
+      { id: 'zMsFJjJcXoE', start: getRandomInt },
+      { id: 'O43eIeOoiNY', start: getRandomInt },
+      { id: 'ZajOabcpGPc', start: getRandomInt },
+      { id: '8zGRsyszJ_c', start: getRandomInt },
+      { id: '8C8EFWnHj90', start: getRandomInt },
+      { id: 'ZH83RQhwbxg', start: getRandomInt },
+      { id: 'D7kdflqFvCs', start: getRandomInt },
+      { id: 'y1Gf4ue4Xzc', start: getRandomInt },
+      { id: 'X6PhsrcO80g', start: getRandomInt },
+      { id: 'EmQPIcyd2pA', start: getRandomInt },
+      { id: '0Svrf3BOsp4', start: getRandomInt },
+      { id: 'q8h0mURm6Vg', start: getRandomInt },
+      { id: 'sjSiLKVE3SA', start: getRandomInt },
+      { id: 'sht6OP94lPM', start: getRandomInt },
+      { id: 'ITjHMWibaPo', start: getRandomInt },
+      { id: 'sjSiLKVE3SA', start: getRandomInt },
+      { id: 'lXovr2ViZbA', start: getRandomInt },
+      { id: 'GRwu9TnVWaY', start: getRandomInt },
+      { id: 'IQAn2Z80gn0', start: getRandomInt },
+      { id: 'ITjHMWibaPo', start: getRandomInt },
+      { id: 'SZ-KM6qN1dU', start: getRandomInt },
+      { id: 'O5a1QNUZ8nc', start: getRandomInt },
+      { id: 'hWXp1SF38sU', start: getRandomInt },
+      { id: 'SStMvMMElXY', start: getRandomInt },
+      { id: 'QZxfq3h6n18', start: getRandomInt },
+      { id: 'Oxyqr7lS9N8', start: getRandomInt },
+      { id: '2gaGDLdsuto', start: getRandomInt },
+      { id: 'sSQRj9ViJiQ', start: getRandomInt },
+      { id: 'sjSiLKVE3SA', start: getRandomInt },
+      { id: 'jjRzc4w6Xfw', start: getRandomInt },
+      { id: 'zMsFJjJcXoE', start: getRandomInt },
+      { id: 'vOmLbfrDmLk', start: getRandomInt },
+      { id: 'dBnYVuwF7VY', start: getRandomInt },
+      { id: 'hWXp1SF38sU', start: getRandomInt },
+      { id: 'UC5-E7zKbyQ', start: getRandomInt },
+      { id: '72BgDRXHfHE', start: getRandomInt },
+      { id: 'o7Zqh4NR3UM', start: getRandomInt },
+      { id: 'H2LmHkj8E9g', start: getRandomInt },
+      { id: 'j6lcsaXKfYM', start: getRandomInt },
+      { id: 'S6lSiFvbKaw', start: getRandomInt },
+      { id: '2AI_YN8RjgY', start: getRandomInt },
+      { id: '8zGRsyszJ_c', start: getRandomInt },
+      { id: 'N2DVwUlhXpc', start: getRandomInt },
+      { id: 'okVlAfcl4s0', start: getRandomInt },
+      { id: 'TxszQfH8lG4', start: getRandomInt },
+      { id: 'twU04tPiOVw', start: getRandomInt },
+      { id: 'RZaA3_Gc3mc', start: getRandomInt },
+      { id: 'EKUxLbu9_wA', start: getRandomInt },
+      { id: 'sSQRj9ViJiQ', start: getRandomInt },
+      { id: 'IBMdJbPGHuo', start: getRandomInt },
+      { id: 'rAveVAd5130', start: getRandomInt },
+      { id: 'FJ8RzKn1m4g', start: getRandomInt },
+      { id: 'q8h0mURm6Vg', start: getRandomInt },
+      { id: 'uQKakjRTsA4', start: getRandomInt },
+      { id: 'yYESB2w1-b8', start: getRandomInt },
+      { id: 'lXovr2ViZbA', start: getRandomInt },
+      { id: 'GRwu9TnVWaY', start: getRandomInt },
+      { id: 'jjRzc4w6Xfw', start: getRandomInt },
+      { id: 'l2SjhV7lt_0', start: getRandomInt },
+      { id: 'hWXp1SF38sU', start: getRandomInt },
+      { id: 'j6lcsaXKfYM', start: getRandomInt },
+      { id: 'lXovr2ViZbA', start: getRandomInt },
+      { id: 'Yqf-w65-y8E', start: getRandomInt },
+      { id: '72BgDRXHfHE', start: getRandomInt },
+      { id: 'sjSiLKVE3SA', start: getRandomInt },
+      { id: 'Oxyqr7lS9N8', start: getRandomInt },
+      { id: 'JZ9yhEdqFS8', start: getRandomInt },
+      { id: 'UC5-E7zKbyQ', start: getRandomInt },
+      { id: 'zgoovi4neMM', start: getRandomInt },
+      { id: 'qLwVMpq1euo', start: getRandomInt },
+      { id: 'WO46e-zmp8Y', start: getRandomInt },
+      { id: 'S3rdaJRb8_M', start: getRandomInt },
+      { id: 'IQAn2Z80gn0', start: getRandomInt },
+      { id: '2yq1vBpBT3o', start: getRandomInt },
+      { id: 'WmgV-8_laPE', start: getRandomInt },
+      { id: 'O5a1QNUZ8nc', start: getRandomInt },
+      { id: 'BdkCkEf-Dt4', start: getRandomInt },
+      { id: 'BRc8RnR-Z8U', start: getRandomInt },
+      { id: '7lxIl_JNrNw', start: getRandomInt },
+      { id: 'lh0M67j2oA0', start: getRandomInt },
+      { id: 'loWSCHsICXI', start: getRandomInt },
+      { id: 'X6PhsrcO80g', start: getRandomInt }
+    ];
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    function getRandomVideo() {
+      const video = videos[Math.floor(Math.random() * videos.length)];
+      return { id: video.id, start: getRandomInt(0, 120) };
+    }
+
+    function createPlayer(videoId, startTime = 0, autoplay = false) {
+      return new YT.Player('player', {
+        height: '480',
+        width: '854',
+        videoId: videoId,
+        playerVars: {
+          autoplay: autoplay ? 1 : 0,
+          start: startTime
+        },
+        events: {
+          'onStateChange': onPlayerStateChange
+        }
+      });
+    }
+
+    function playRandomVideo() {
+      clearTimeout(videoTimeout);
+      const video = getRandomVideo();
+      previousVideoId = currentVideoId;
+      currentVideoId = video.id;
+
+      const playerContainer = document.getElementById('playerContainer');
+      playerContainer.innerHTML = '<div id="player"></div>';
+      playerContainer.style.opacity = 1;
+      currentPlayer = createPlayer(video.id, video.start, true);
+
+      const randomDuration = getRandomInt(30, 120) * 1000;
+      videoTimeout = setTimeout(playRandomVideo, randomDuration);
+    }
+
+    function onPlayerStateChange(event) {
+      if (event.data === YT.PlayerState.ENDED) {
+        playRandomVideo();
+      }
+    }
+
+    function startPlayback(duration = 80) {
+      clearTimeout(playbackTimeout);
+      clearInterval(fadeoutInterval);
+      clearTimeout(videoTimeout);
+      playRandomVideo();
+
+      playbackTimeout = setTimeout(() => {
+        fadeOutAndStop();
+      }, duration * 60 * 1000);
+    }
+
+    function startPlaybackWithCustomDuration() {
+      const duration = parseInt(document.getElementById('durationInput').value);
+      if (!isNaN(duration) && duration > 0) {
+        startPlayback(duration);
+      } else {
+        alert('Please enter a valid number of minutes.');
+      }
+    }
+
+    function fadeOutAndStop() {
+      if (!currentPlayer) return;
+      let volume = 100;
+      let opacity = 1;
+      fadeoutInterval = setInterval(() => {
+        if (volume > 0 || opacity > 0) {
+          volume = Math.max(0, volume - 2);
+          opacity = Math.max(0, opacity - 0.02);
+          currentPlayer.setVolume(volume);
+          document.getElementById('playerContainer').style.opacity = opacity;
+        } else {
+          clearInterval(fadeoutInterval);
+          currentPlayer.stopVideo();
+        }
+      }, 100);
+    }
+
+    function getCurrentVideoUrl() {
+      alert('Current Video URL: https://www.youtube.com/watch?v=' + currentVideoId);
+    }
+
+    function returnToPreviousVideo() {
+      if (previousVideoId) {
+        currentVideoId = previousVideoId;
+        playRandomVideo();
+      }
+    }
+
+    function onYouTubeIframeAPIReady() {
+      const previewVideo = getRandomVideo();
+      currentVideoId = previewVideo.id;
+      currentPlayer = createPlayer(previewVideo.id, previewVideo.start, false); // NO autoplay
+    }
+  </script>
+</body>
+</html>
